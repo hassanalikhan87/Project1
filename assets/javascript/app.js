@@ -1,100 +1,69 @@
-$(document).ready(function () {
 
-    //array of food
-    var topics = [];
-    console.log(topics);
+//For Giphy
+//On search button click function
+$("#btn").on("click", function (event) {
+    event.preventDefault();
+    //search box input
+    let formInput = $("#user").val();
+    //for grabbing gif from Giffy
 
-    //for showButtons
-    function showButtons() {
-        $("#topics-display").empty();
+    let grabGif = $.get(
+        "https://api.giphy.com/v1/gifs/search?q=" +
+        formInput +
+        "&api_key=6CjfUAofGjvsi1tn9tiW0Cw4hixSKLFC&limit=1"
+    );
+    // selects and adds gif to pic div
+    let imgTagArray = $("#pic");
+    // push each image as you loop through the response array to the image array
 
-        for (var i = 0; i < topics.length; i++) {
-            var newButton = $("<button>").text(topics[i]).attr("data-topic", topics[i]).addClass("topic-button");
-            $("#topics-display").append(newButton);
-            console.log("ha")
+    grabGif.done(function (response) {
+        console.log(response);
+        for (let i = 0; i < response.data.length; i++) {
+            let eachImageUrl = response.data[i].images.original.url;
+            // setInterval(eachImageUrl,2000);
+            imgTagArray[i].setAttribute("src", eachImageUrl);
         }
-    }
-
-
-        // for showGifs
-        function showGifs() {
-            $("#gifs-display").empty();
-
-            var topic = $(this).attr("data-topic");
-
-            //for Giphy Query
-            var queryURL = "http://api.giphy.com/v1/gifs/search?q="
-                + topic + "&rating=pg&api_key=6CjfUAofGjvsi1tn9tiW0Cw4hixSKLFC&limit=1";
-                
-
-            // AJAX GET request
-            $.ajax({
-                url: queryURL,
-                method: "GET"
-            })
-                .onLoad(function(response) {
-                    
-
-                    var results = response.data;
-
-                    // Grab the gifs
-
-                    for (var i = 0; i < results.length; i++) {
-
-                        var topicDiv = $("<div>").addClass("gif-div");
-
-                        var rating = results[i].rating;
-
-                        var still = results[i].images.fixed_height_still.url;
-
-                        var animate = results[i].images.fixed_height.url;
-
-                        var p = $("<p>").text("Rating: " + rating);
-
-                        var topicImage = $("<img>").addClass("gif").attr({"src": still, "data-still": still, "data-animate": animate, "data-state": "still"});
-
-                        topicDiv.append(topicImage);
-                        topicDiv.append(p);
-
-                        $("#gifs-display").prepend(topicDiv);
-                        console.log(topicDiv);
-
-                    }
-                });
-            }
-
-            // for animation
-        
-            function changeAnimate() {
-                var state = $(this).attr("data-state");
-            
-                if (state === "still") {
-                  $(this).attr("src", $(this).attr("data-animate"));
-                  $(this).attr("data-state", "animate");
-                } else {
-                  $(this).attr("src", $(this).attr("data-still"));
-                  $(this).attr("data-state", "still");
-                }
-              }
-            
-              //for "On clicks"
-              $(document).on("click", ".topic-button", showGifs);
-            
-              $(document).on("click", ".gif", changeAnimate);
-            
-              $("#add-topic").on("click", function(event) {
-                event.preventDefault();
-
-                var topic= $("#topic-input").val().trim();
-                $("#topic-input").val("");
-                topics.push(topic);
-                showButtons();
-              
-
-            
-            }); 
-              
-
-    
-    
+    });
 });
+
+function addSound() {
+    // on every click of button a following function will execute
+    $("#btn").on('click', function (e) {
+        e.preventDefault();
+
+        // variable key stores the user input it will add a keyword songs in the end of every search, So that it will brings up songs only from youtube
+        var key = $('#user').val() + "+songs";
+
+        // variable query stores api key and other keywords and their values 
+        var query = "https://www.googleapis.com/youtube/v3/search?q=" + key + "&song&key=AIzaSyDj8nQkKtYUX1DyaGo6E43_gywHp4xWoSY" + "&part=snippet&mine=true&videoEmbeddable=true&type=video&";
+
+        // ajax call
+        $.ajax({
+            url: query,
+            method: 'GET',
+
+        })
+            .then(function (responseSong) {
+
+                // to check the object
+                // console.log(responseSong);
+                var results = responseSong.items;
+
+                // variable video to store video id and always bring up the fourth result from youtube
+                var video = results[3].id.videoId;
+
+                // source variable contains the constant url for every search
+                const source = "https://www.youtube.com/embed/";
+
+                // to test id obtained from object with every search
+                // console.log(video);
+
+                // autoplay is set true to play video without click
+                $('#video').attr("src", source + video + "?autoplay=1");
+            });
+    });
+}
+addSound();
+
+
+
